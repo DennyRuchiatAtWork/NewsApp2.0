@@ -1,9 +1,11 @@
 package com.example.newsapp20
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -40,6 +42,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.newsapp20.ui.theme.NewsApp20Theme
@@ -47,6 +50,7 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -62,51 +66,53 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// TODO: Split the headline data and latest news data
-
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NewsScreen(newsViewModel: NewsViewModel = viewModel()) {
-    val newsResponse by newsViewModel.newsState
+    val headlineNewsResponse by newsViewModel.headlineNewsState
+    val latestNewsResponse by newsViewModel.latestNewsState
 
     val listState = rememberLazyListState()
-    val showHeadline by remember {
-        derivedStateOf {
-            listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset < 200
-        }
-    }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        AnimatedVisibility(
-            visible = showHeadline,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
+    LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+        // Headline News Section
+        item {
             Column {
-                Text("Headline News", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold), modifier = Modifier
-                    .padding(
-                    start = 10.dp,
-                    top = 30.dp,
-                    end = 16.dp,
-                    bottom = 4.dp
-                ))
-                newsResponse?.articles?.firstOrNull()?.let { article ->
+                Text(
+                    "Headline News",
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.padding(
+                        start = 10.dp,
+                        top = 30.dp,
+                        end = 16.dp,
+                        bottom = 4.dp
+                    )
+                )
+                headlineNewsResponse?.articles?.firstOrNull()?.let { article ->
                     HeadlineArticle(article)
                 }
             }
         }
 
-        Text("Latest News", style = MaterialTheme.typography.displaySmall, modifier = Modifier.padding(16.dp))
+        // Latest News Section Title
+        item {
+            Text(
+                "Latest News",
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier.padding(16.dp)
+            )
+        }
 
-        LazyColumn(state = listState) {
-            newsResponse?.articles?.drop(1)?.let { articles ->
-                items(articles) { article ->
-                    NewsListItem(article)
-                }
+        // Latest News Items
+        latestNewsResponse?.articles?.let { articles ->
+            items(articles) { article ->
+                NewsListItem(article)
             }
         }
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HeadlineArticle(article: Article) {
     val publishedDate = ZonedDateTime.parse(article.publishedAt)
@@ -122,10 +128,7 @@ fun HeadlineArticle(article: Article) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(250.dp)
-                    .border(
-                        border = BorderStroke(1.dp, Color.Gray),
-                        shape = RoundedCornerShape(8.dp)
-                    ),
+                    .clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop
             )
         }
@@ -146,7 +149,7 @@ fun HeadlineArticle(article: Article) {
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    "${article.author ?: "Unknown"}",
+                    article.author ?: "Unknown",
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.W400),
                     color = Color.Gray
                 )
@@ -169,12 +172,14 @@ fun HeadlineArticle(article: Article) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NewsListItem(article: Article) {
     val publishedDate = ZonedDateTime.parse(article.publishedAt)
     val formattedDate = DateTimeFormatter.ofPattern("d MMM, yyyy").format(publishedDate)
 
-    Row(modifier = Modifier.padding(8.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically
+            ,modifier = Modifier.padding(8.dp)) {
         article.urlToImage?.let { url ->
             Image(
                 painter = rememberAsyncImagePainter(url),
@@ -195,33 +200,35 @@ fun NewsListItem(article: Article) {
                 article.title,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W500))
 
-            Row(verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         painter = painterResource(R.drawable.baseline_person_24),
                         contentDescription = null,
                         tint = Color.Gray, // Change icon color to gray
-                        modifier = Modifier.size(24.dp) // Set ic
+                        modifier = Modifier.size(18.dp) // Set ic
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        "${article.author ?: "Unknown"}",
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.W400),
+                        article.author ?: "Unknown",
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            fontWeight = FontWeight.W400,
+                            fontSize = 12.sp),
                         color = Color.Gray
                     )
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Spacer(modifier = Modifier.weight(1f))
                     Icon(
                         painter = painterResource(R.drawable.baseline_calendar_today_24),
                         contentDescription = null,
                         tint = Color.Gray, // Change icon color to gray
-                        modifier = Modifier.size(24.dp) // Set ic
+                        modifier = Modifier.size(18.dp) // Set ic
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = formattedDate,
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.W400),
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            fontWeight = FontWeight.W400,
+                            fontSize = 12.sp),
                         color = Color.Gray
                     )
                 }

@@ -8,24 +8,36 @@ import kotlinx.coroutines.launch
 import retrofit2.await
 
 class NewsViewModel : ViewModel() {
-    private val _newsState = mutableStateOf<NewsResponse?>(null)
-    val newsState: State<NewsResponse?> = _newsState
+    private val _headlineNewsState = mutableStateOf<NewsResponse?>(null)
+    val headlineNewsState: State<NewsResponse?> = _headlineNewsState
+
+    private val _latestNewsState = mutableStateOf<NewsResponse?>(null)
+    val latestNewsState: State<NewsResponse?> = _latestNewsState
 
     init {
-        fetchNews()
+        fetchHeadlineNews()
+        fetchLatestNews()
     }
 
-    private fun fetchNews() {
+    private fun fetchHeadlineNews() {
         viewModelScope.launch {
             try {
                 val response = RetrofitInstance.api.getTopHeadlines(apiKey = "0b4fcd0098a64138a47a5100d4936072").await()
-                _newsState.value = response
+                _headlineNewsState.value = response
+            } catch (e: Exception) {
+                // Handle error
+            }
+        }
+    }
 
-                val latestNewsResponse = RetrofitInstance.api.getLatestNews(
+    private fun fetchLatestNews() {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitInstance.api.getLatestNews(
                     query = "bitcoin",
                     apiKey = "0b4fcd0098a64138a47a5100d4936072"
                 ).await()
-                _newsState.value = latestNewsResponse
+                _latestNewsState.value = response
             } catch (e: Exception) {
                 // Handle error
             }
