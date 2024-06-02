@@ -66,4 +66,14 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+
+    //coil
+    implementation ("io.coil-kt:coil-compose:2.6.0")
+
+    // viewModel
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.1")
 }
