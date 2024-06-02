@@ -20,6 +20,12 @@ class NewsViewModel : ViewModel() {
             try {
                 val response = RetrofitInstance.api.getTopHeadlines(apiKey = "0b4fcd0098a64138a47a5100d4936072").await()
                 _newsState.value = response
+
+                val latestNewsResponse = RetrofitInstance.api.getLatestNews(
+                    query = "bitcoin",
+                    apiKey = "0b4fcd0098a64138a47a5100d4936072"
+                ).await()
+                _newsState.value = latestNewsResponse
             } catch (e: Exception) {
                 // Handle error
             }
