@@ -10,6 +10,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -37,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -66,6 +68,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NewsScreen(newsViewModel: NewsViewModel = viewModel()) {
@@ -82,8 +85,8 @@ fun NewsScreen(newsViewModel: NewsViewModel = viewModel()) {
                     "Headline News",
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                     modifier = Modifier.padding(
-                        start = 10.dp,
-                        top = 30.dp,
+                        start = 8.dp,
+                        top = 28.dp,
                         end = 16.dp,
                         bottom = 4.dp
                     )
@@ -95,12 +98,21 @@ fun NewsScreen(newsViewModel: NewsViewModel = viewModel()) {
         }
 
         // Latest News Section Title
-        item {
-            Text(
-                "Latest News",
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                modifier = Modifier.padding(16.dp)
-            )
+        stickyHeader {
+            Surface {
+                Text(
+                    "Latest News",
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = 8.dp,
+                            top = 28.dp,
+                            end = 16.dp,
+                            bottom = 4.dp
+                        )
+                )
+            }
         }
 
         // Latest News Items
